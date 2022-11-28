@@ -82,6 +82,19 @@ async function run() {
             const result = await productsCollection.updateOne(filter, updatedDoc, options)
             res.send(result)
         })
+        // remove promote products 
+        app.put('/removepromoteproducts/:id', async(req, res) => {
+            const id = req.params.id 
+            const filter = {_id: ObjectId(id)}
+            const options = {upsert: true}
+            const updatedDoc = {
+                $set: {
+                    ad: 'no'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
 
         // get promote products 
         app.get('/promoteditem', async(req, res) => {
@@ -90,11 +103,36 @@ async function run() {
             res.send(result)
             
         })
+        // get remove promote products 
+        app.get('/removepromoteitem', async(req, res) => {
+            const query = {ad: 'no'}
+            const result = await productsCollection.find(query).toArray()
+            res.send(result)
+            
+        })
 
-        // delete promote products 
-        // app.delete('/deletepromoteitem', async(req, res) => {
-        //     const 
-        // })
+       // delete promote products 
+        app.delete('/deletepromoteitem/:id', async(req, res) => {
+            const id = req.params.id 
+            const query = {_id: ObjectId(id)}
+            const result = await productsCollection.deleteOne(query)
+            res.send(result)
+        })
+
+        // verified seller 
+        app.put('/verifiedseller', async(req, res) => {
+            const email = req.query.email
+            const filter = {email}
+            const options = {upsert: true}
+            const updatedDoc = {
+                $set: {
+                    status: 'verified'
+                }
+            }
+            const result = await productsCollection.updateMany(filter, updatedDoc, options)
+            const resultTwo = await usersCollection.updateOne(filter, updatedDoc, options)
+            res.send({result, resultTwo})
+        })
 
         // add products to db 
         app.post('/products', async (req, res) => {
