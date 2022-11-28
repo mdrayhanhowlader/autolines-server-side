@@ -63,12 +63,38 @@ async function run() {
         })
 
         // get product by seller
-        app.get('/sellerproducts/email/:id', async(req, res) => {
-            const email = req.params.email
+        app.get('/sellerproducts', async(req, res) => {
+            const email = req.query.email
             const query = {email}
             const products = await productsCollection.find(query).toArray()
             res.send(products)
         })
+        // promote products 
+        app.put('/promoteproducts/:id', async(req, res) => {
+            const id = req.params.id 
+            const filter = {_id: ObjectId(id)}
+            const options = {upsert: true}
+            const updatedDoc = {
+                $set: {
+                    ad: 'yes'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
+        // get promote products 
+        app.get('/promoteditem', async(req, res) => {
+            const query = {ad: 'yes'}
+            const result = await productsCollection.find(query).toArray()
+            res.send(result)
+            
+        })
+
+        // delete promote products 
+        // app.delete('/deletepromoteitem', async(req, res) => {
+        //     const 
+        // })
 
         // add products to db 
         app.post('/products', async (req, res) => {
