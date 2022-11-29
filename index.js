@@ -47,6 +47,7 @@ async function run() {
         const categoriesCollection = client.db('autolines').collection('categories');
         const bookingsCollection = client.db('autolines').collection('bookings');
         const usersCollection = client.db('autolines').collection('users');
+        const wishlistCollection = client.db('autolines').collection('wishlist')
         
 
         // get only categories
@@ -170,6 +171,22 @@ async function run() {
             res.send(bookingsProduct)
         })
 
+        // bookings by id for payment 
+        app.get('/bookings/:id', async(req, res) => {
+            const id = req.params.id 
+            const query = {_id: ObjectId(id)}
+            const booking = await bookingsCollection.findOne(query)
+            res.send(booking)
+        })
+
+        // bookings for each buyer
+        app.get('/allbookings', async(req, res) => {
+            const email = req.query.email
+            const query = {email} 
+            const result = await bookingsCollection.find(query).toArray()
+            res.send(result)
+        })
+
         // delete bookings order from db 
         app.delete('/deletebookings/:id', async(req, res) => {
             const id = req.params.id 
@@ -188,6 +205,30 @@ async function run() {
             const query = {email: email}
             const bookings = await bookingsCollection.find(query).toArray()
             res.send(bookings)
+        })
+
+        
+        // add wishlist
+        app.post('/wishlist', async(req, res) => {
+            const wishlist = req.body 
+            const wishlistProduct = await wishlistCollection.insertOne(wishlist)
+            res.send(wishlistProduct)
+        })
+
+
+        app.get('/wishlist', async(req, res) => {
+            const email = req.query.email 
+            const query = {email}
+            const result = await wishlistCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        // delete wishlist 
+        app.delete('/deleteWishlist/:id', async(req, res) => {
+            const id = req.params.id 
+            const query = {_id: ObjectId(id)}
+            const result = await wishlistCollection.deleteOne(query)
+            res.send(result)
         })
 
         // jwt 
