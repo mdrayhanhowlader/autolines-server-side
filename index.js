@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 
 // middleware
@@ -48,6 +49,7 @@ async function run() {
         const bookingsCollection = client.db('autolines').collection('bookings');
         const usersCollection = client.db('autolines').collection('users');
         const wishlistCollection = client.db('autolines').collection('wishlist')
+        const paymentsCollection = client.db('autolines').collection('payments')
         
 
         // get only categories
@@ -332,6 +334,40 @@ async function run() {
             res.send(admin);
         })
 
+
+        // stripe 
+        app.post('/create-payment-intent', async(req, res) => {
+            const booking = req.body;
+            const price = booking.price;
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types" : [
+                    "card"
+                ]
+            })
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
+
+        app.post('/payments', async(req, res) => {
+            const payment = req.body 
+            const result = await paymentsCollection.insertOne(payment)
+            const id = payment.bookingId
+            const filter = {_id: ObjectId(id)}
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
     }
     finally {
 
