@@ -335,7 +335,7 @@ async function run() {
         })
 
 
-        // stripe 
+        // create stripe payment api 
         app.post('/create-payment-intent', async(req, res) => {
             const booking = req.body;
             const price = booking.price;
@@ -367,7 +367,10 @@ async function run() {
             }
             const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
             res.send(result)
+            
         })
+
+        // get payments orders by query email
         app.get('/payments', async(req, res) => {
             const email = req.query.email 
             const query = {email}
