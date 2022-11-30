@@ -102,7 +102,7 @@ async function run() {
         // get promote products 
         app.get('/promoteditem', async(req, res) => {
             const query = {ad: 'yes'}
-            const result = await productsCollection.find(query).toArray()
+            const result = await productsCollection.find(query).limit(3).toArray()
             res.send(result)
             
         })
