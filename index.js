@@ -368,6 +368,12 @@ async function run() {
             const updatedResult = await bookingsCollection.updateOne(filter, updatedDoc)
             res.send(result)
         })
+        app.get('/payments', async(req, res) => {
+            const email = req.query.email 
+            const query = {email}
+            const result = await paymentsCollection.find(query).toArray()
+            res.send(result)
+        })
     }
     finally {
 
